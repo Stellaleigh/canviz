@@ -331,40 +331,58 @@
       "name": "[variables('functionAppName')]",
       "apiVersion": "2015-08-01",
       "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverFarms/', concat(parameters('hostingPlanName'), 'functionapp'))]",
+        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.NotificationHubs/namespaces/', variables('notificationHubNamespaceName'))]",
+        "[resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/', variables('notificationHubNamespaceName'), variables('notificationHubName'))]"
+      ],
       "properties": {
         "name": "[variables('functionAppName')]",
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('hostingPlanName'), 'functionapp'))]",
         "siteConfig": {
-          "AlwaysOn": true
+          "AlwaysOn": true,
+          "appSettings": [
+            {
+              "name": "AzureWebJobsDashboard",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~1"
+            },
+            {
+              "name": "WEBSITE_NODE_DEFAULT_VERSION",
+              "value": "6.5.0"
+            },
+            {
+              "name": "MS_NotificationHubName",
+              "value": "[variables('notificationHubName')]"
+            },
+            {
+              "name": "MS_NotificationHubConnectionString",
+              "value": "[listkeys(resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/authorizationRules', variables('notificationHubNamespaceName'), variables('notificationHubName'), 'DefaultFullSharedAccessSignature'), '2014-09-01').primaryConnectionString]"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+            },
+            {
+              "name": "WEBSITE_CONTENTSHARE",
+              "value": "[variables('functionAppName')]"
+            },
+            {
+              "name": "command",
+              "value": "Cloud\\PropertyInsurance.Function\\deploy.cmd"
+            }
+          ]
         }
       },
-      "dependsOn": [
-        "[resourceId('Microsoft.Web/serverFarms/', concat(parameters('hostingPlanName'), 'functionapp'))]",
-        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-        "[resourceId('Microsoft.NotificationHubs/namespaces/', variables('notificationHubNamespaceName'))]"
-      ],
       "resources": [
-        {
-          "name": "appsettings",
-          "type": "config",
-          "apiVersion": "2015-08-01",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/sites', variables('functionAppName'))]",
-            "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-            "[resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/', variables('notificationHubNamespaceName'), variables('notificationHubName'))]"
-          ],
-          "properties": {
-            "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]",
-            "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]",
-            "FUNCTIONS_EXTENSION_VERSION": "~1",
-            "WEBSITE_NODE_DEFAULT_VERSION": "6.5.0",
-            "MS_NotificationHubName": "[variables('notificationHubName')]",
-            "MS_NotificationHubConnectionString": "[listkeys(resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/authorizationRules', variables('notificationHubNamespaceName'), variables('notificationHubName'), 'DefaultFullSharedAccessSignature'), '2014-09-01').primaryConnectionString]",
-            "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]",
-            "WEBSITE_CONTENTSHARE": "[variables('functionAppName')]",
-            "command": "Cloud\\PropertyInsurance.Function\\deploy.cmd"
-          }
-        },
         {
           "apiVersion": "2015-08-01",
           "name": "web",
@@ -386,34 +404,61 @@
       "name": "[variables('apiSiteName')]",
       "apiVersion": "2015-08-01",
       "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/', variables('notificationHubNamespaceName'), variables('notificationHubName'))]",
+        "[resourceId('Microsoft.Logic/workflows/', variables('workflowsApprovePictureName'))]"
+      ],
       "properties": {
         "name": "[variables('apiSiteName')]",
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
+        "siteConfig": {
+          "AlwaysOn": true,
+          "appSettings": [
+            {
+              "name": "MS_AzureStorageAccountConnectionString",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+            },
+            {
+              "name": "MS_NotificationHubName",
+              "value": "[variables('notificationHubName')]"
+            },
+            {
+              "name": "MS_NotificationHubConnectionString",
+              "value": "[listkeys(resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/authorizationRules', variables('notificationHubNamespaceName'), variables('notificationHubName'), 'DefaultFullSharedAccessSignature'), '2014-09-01').primaryConnectionString]"
+            },
+            {
+              "name": "mtcsjsonUrl",
+              "value": "[variables('mtcsJsonUrl')]"
+            },
+            {
+              "name": "claimDetailsPageUrl",
+              "value": "[variables('claimDetailsPageBaseUrl')]"
+            },
+            {
+              "name": "ApprovePictureLogicApp",
+              "value": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows/', variables('workflowsApprovePictureName')), '/triggers/manual'), '2016-06-01').value]"
+            },
+            {
+              "name": "ida:Tenant",
+              "value": "[parameters('B2CDomainname')]"
+            },
+            {
+              "name": "ida:ClientId",
+              "value": "[parameters('B2CApplicationId')]"
+            },
+            {
+              "name": "ida:SusiPolicyId",
+              "value": "[parameters('SusiPolicyId')]"
+            },
+            {
+              "name": "command",
+              "value": "Cloud\\PropertyInsurance.API\\deploy.cmd"
+            }
+          ]
+        }
       },
       "resources": [
-        {
-          "apiVersion": "2015-08-01",
-          "type": "config",
-          "name": "appsettings",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/sites/', variables('apiSiteName'))]",
-            "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-            "[resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/', variables('notificationHubNamespaceName'), variables('notificationHubName'))]",
-            "[resourceId('Microsoft.Logic/workflows/', variables('workflowsApprovePictureName'))]"
-          ],
-          "properties": {
-            "MS_AzureStorageAccountConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]",
-            "MS_NotificationHubName": "[variables('notificationHubName')]",
-            "MS_NotificationHubConnectionString": "[listkeys(resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/authorizationRules', variables('notificationHubNamespaceName'), variables('notificationHubName'), 'DefaultFullSharedAccessSignature'), '2014-09-01').primaryConnectionString]",
-            "mtcsjsonUrl": "[variables('mtcsJsonUrl')]",
-            "claimDetailsPageUrl": "[variables('claimDetailsPageBaseUrl')]",
-            "ApprovePictureLogicApp": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows/', variables('workflowsApprovePictureName')), '/triggers/manual'), '2016-06-01').value]",
-            "ida:Tenant": "[parameters('B2CDomainname')]",
-            "ida:ClientId": "[parameters('B2CApplicationId')]",
-            "ida:SusiPolicyId": "[parameters('SusiPolicyId')]",
-            "command": "Cloud\\PropertyInsurance.API\\deploy.cmd"
-          }
-        },
         {
           "apiVersion": "2015-08-01",
           "name": "web",
@@ -439,29 +484,43 @@
       "name": "[variables('webSiteName')]",
       "apiVersion": "2015-08-01",
       "location": "[variables('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Logic/workflows/', variables('workflowsPushNotificationName'))]"
+      ],
       "properties": {
         "name": "[variables('webSiteName')]",
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('hostingPlanName'))]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "AzureStorageAccountConnectionString",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]"
+            },
+            {
+              "name": "ida:ClientId",
+              "value": "[parameters('AADClientId')]"
+            },
+            {
+              "name": "ida:ClientSecret",
+              "value": "[parameters('AADClientSecret')]"
+            },
+            {
+              "name": "ida:Domain",
+              "value": "[parameters('B2CDomainname')]"
+            },
+            {
+              "name": "ClaimApproverUrl",
+              "value": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows/', variables('workflowsPushNotificationName')), '/triggers/manual'), '2016-06-01').value]"
+            },
+            {
+              "name": "command",
+              "value": "Cloud\\PropertyInsurance.Web\\deploy.cmd"
+            }
+          ]
+        }
       },
       "resources": [
-        {
-          "apiVersion": "2015-08-01",
-          "type": "config",
-          "name": "appsettings",
-          "dependsOn": [
-            "[resourceId('Microsoft.Web/sites/', variables('webSiteName'))]",
-            "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
-            "[resourceId('Microsoft.Logic/workflows/', variables('workflowsPushNotificationName'))]"
-          ],
-          "properties": {
-            "AzureStorageAccountConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listkeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2015-05-01-preview').key1,';')]",
-            "ida:ClientId": "[parameters('AADClientId')]",
-            "ida:ClientSecret": "[parameters('AADClientSecret')]",
-            "ida:Domain": "[parameters('B2CDomainname')]",
-            "ClaimApproverUrl": "[listCallbackURL(concat(resourceId('Microsoft.Logic/workflows/', variables('workflowsPushNotificationName')), '/triggers/manual'), '2016-06-01').value]",
-            "command": "Cloud\\PropertyInsurance.Web\\deploy.cmd"
-          }
-        },
         {
           "apiVersion": "2015-08-01",
           "name": "web",

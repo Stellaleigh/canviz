@@ -388,8 +388,7 @@
           "name": "web",
           "type": "sourcecontrols",
           "dependsOn": [
-            "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]",
-            "[resourceId('Microsoft.Web/Sites/config', variables('functionAppName'), 'appsettings')]"
+            "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]"
           ],
           "properties": {
             "RepoUrl": "[parameters('sourceCodeRepositoryURL')]",
@@ -464,8 +463,7 @@
           "name": "web",
           "type": "sourcecontrols",
           "dependsOn": [
-            "[resourceId('Microsoft.Web/sites/', variables('apiSiteName'))]",
-            "[resourceId('Microsoft.Web/Sites/config', variables('apiSiteName'), 'appsettings')]"
+            "[resourceId('Microsoft.Web/sites/', variables('apiSiteName'))]"
           ],
           "properties": {
             "RepoUrl": "[parameters('sourceCodeRepositoryURL')]",
@@ -526,8 +524,7 @@
           "name": "web",
           "type": "sourcecontrols",
           "dependsOn": [
-            "[resourceId('Microsoft.Web/sites/', variables('webSiteName'))]",
-            "[resourceId('Microsoft.Web/Sites/config', variables('webSiteName'), 'appsettings')]"
+            "[resourceId('Microsoft.Web/sites/', variables('webSiteName'))]"
           ],
           "properties": {
             "RepoUrl": "[parameters('sourceCodeRepositoryURL')]",
